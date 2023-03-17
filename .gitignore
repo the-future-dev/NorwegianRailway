@@ -1,0 +1,4 @@
+#Ignore all the databases that are created locally
+.db
+
+NorwegianRailwayUI.py
