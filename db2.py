@@ -1,7 +1,11 @@
 import os
 import re
 import sqlite3
+from termcolor import colored
 from datetime import datetime
+from rich.console import Console
+
+console = Console()
 
 db_path = 'database/railway.db'
 
@@ -62,10 +66,10 @@ def get_train_routes():
     result = c.fetchall()
     
     if not result:
-        print("! No Tracks were found for this name and day.")
+        console.print(f"! No Tracks were found for this name and day.", style='red')
     
     for row in result:
-        print(f'\n >> Track Name: {row[3]} Route ID: {row[0]} Operator: {row[1]} Direction: {row[2]} \n')
+        console.print(f"\n >> Track Name: {row[3]} Route ID: {row[0]} Operator: {row[1]} Direction: {row[2]} \n", style='green')
     
     conn.close()
 
@@ -79,21 +83,22 @@ def register_customer():
         email = input('> Enter your email: ')
         if re.match(r"[^@]+@[^@]+\.[^@]+", email):
             break
-        print("\033[91m! Invalid email format. Please try again.\033[0m")
+        console.print("! Invalid email format. Please try again.", style= 'red')
     
     while True:
         phone = input('> Enter your phone number: ')
         if re.match(r"^\d{8}$", phone):
             break
-        print("\033[91m! Invalid phone number. Please enter a valid 8-digit phone number.\033[0m")
+        console.print("! Invalid phone number. Please enter a valid 8-digit phone number.", style='red')
     #Insertion of the new user, just if it doesn't exist already
     c.execute("SELECT * FROM Customer WHERE name=? AND email=? AND phone=?", (name, email, int(phone)))
     if c.fetchone() is None:
         c.execute("INSERT INTO Customer (name, email, phone) VALUES (?, ?, ?)", (name, email, int(phone)))
-        print('\033[92m! Registration successful!\033[0m')
+        console.print("! Registration successful", style='green')
         conn.commit()        
     else:
-        print("\033[91m! User already exists!\033[0m")
+        
+        console.print("! User already exists", style='red')
 
     conn.close()
 
@@ -114,7 +119,7 @@ def new_order():
     result = c.fetchone()
     
     if not result:
-        print("\033[91mNo matching customer found.\033[0m")
+        console.print(f'\nNo matching customer found.', style='red')
     else:
         customerID = result[0]
         now = datetime.now()
@@ -126,7 +131,7 @@ def new_order():
         c.execute(query, (purchaseTime, purchaseDate, customerID))
         
         #TO comment
-        print(f"\033[92mNew order created for {name} with order ID {c.lastrowid}\033[0m")
+        console.print(f'\nNew order created for {name} with order ID {c.lastrowid}.', style='green')
         
         conn.commit()
     
