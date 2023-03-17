@@ -3,3 +3,4 @@ The authors are Andrea Ritossa and Mali Faksvåg Kippernes
 
 The purpose is to add an user interface to the database descripted in the following EER Model:
 
+![plot](./images/er-model.png)
