@@ -3,9 +3,9 @@ import re
 import sqlite3
 from datetime import datetime
 
-db_path = 'railway.db'
+db_path = 'database/railway.db'
 
-def create_tables(file_path='dbDefinition.sql'):
+def create_tables(file_path='database/dbDefinition.sql'):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
@@ -17,7 +17,7 @@ def create_tables(file_path='dbDefinition.sql'):
     conn.commit()
     conn.close()
 
-def insert_tables(file_path='dbInsertion.sql'):
+def insert_tables(file_path='database/dbInsertion.sql'):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
