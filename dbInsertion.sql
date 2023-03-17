@@ -87,3 +87,11 @@ INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES 
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (3, 'Steinkjer', '12:31', '12:26');
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (3, 'Trondheim S', NULL, '14:13');
  
+
+ -- task E ------------------------------ --Date: YYYY-MM-DD
+INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-03', 1);
+INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-03', 2);
+INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-03', 3);
+INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-04', 1);
+INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-04', 2);
+INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-04', 3);
