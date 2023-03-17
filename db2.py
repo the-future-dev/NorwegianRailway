@@ -1,4 +1,5 @@
 import os
+import re
 import sqlite3
 
 db_path = 'railway.db'
@@ -36,8 +37,8 @@ def get_train_routes():
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-    station_name = input('Insert the station name [ex. Trondheim]: ')
-    weekday = input('Insert the day [ex. Monday]: ')
+    station_name = input('Insert the station name (ex. Trondheim): ')
+    weekday = input('Insert the day (ex. Monday): ')
     query = """
         SELECT TR.routeID, tr.operator, tr.direction, tr.trackName
         FROM TrainRoute AS TR INNER JOIN TrackSection AS TS
@@ -62,14 +63,49 @@ def get_train_routes():
         print(f'\n> Track Name: {row[3]} Route ID: {row[0]} Operator: {row[1]} Direction: {row[2]} \n')
     conn.close()
 
+def register_customer():
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+
+    #user input validation 
+    name = input('> Enter your name: ')
+    while True:
+        email = input('> Enter your email: ')
+        if re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            break
+        print("! Invalid email format. Please try again.")
+    
+    while True:
+        phone = input('> Enter your phone number: ')
+        if re.match(r"^\d{8}$", phone):
+            break
+        print("! Invalid phone number. Please enter a valid 8-digit phone number.")
+
+    phone = input('> Enter your phone number: ')
+
+    #Insertion of the new user, just if it doesn't exist already
+    c.execute("SELECT * FROM Customer WHERE name=? AND email=? AND phone=?", (name, email, int(phone)))
+    if c.fetchone() is None:
+        c.execute("INSERT INTO Customer (name, email, phone) VALUES (?, ?, ?)", (name, email, int(phone)))
+        print('Registration successful!')
+        conn.commit()        
+    else:
+        print('User already exists!')
+    
+    conn.close()
+
 def main(fileExists):
     if not fileExists: 
         create_tables()
         insert_tables()
     print('Welcome to NorwegianRailways!')
-    funcUser = input('Press 0 to get all train routes that stop at a particular station on a given weekday')
-    if funcUser == '0':
-        get_train_routes()
+    funcUser = '' 
+    while funcUser != '0':
+        funcUser = input('MENU: \n [1] Get all train routes that stop at a particular station on a given weekday \n [2] Signup as a new customer \n [0] Exit \n > ')
+        if funcUser == '1':
+            get_train_routes()
+        elif funcUser == '2':
+            register_customer()
 
 #Connect to the db
 fileExists = True
