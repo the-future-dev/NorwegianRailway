@@ -85,7 +85,7 @@ INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES 
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (3, 'Mo i Rana', '08:11', NULL);
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (3, 'Mosjoen', '09:14', '09:09');
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (3, 'Steinkjer', '12:31', '12:26');
-INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (3, 'Trondheim S', NULL, '14:13');
+INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (3, 'Trondheim', NULL, '14:13');
  
 
  -- task E ------------------------------ --Date: YYYY-MM-DD
