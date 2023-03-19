@@ -1,8 +1,8 @@
 import os
 
-from code.init import create_tables, insert_tables                   #Opgave  A, B
-from code.routeSearch import get_train_routes, findRoutesDateTime    #Oppgave C, D
-from code.customer import register_customer, new_order               #Oppgave E, F, G
+from code.init          import create_tables, insert_tables                     #Opgave  A, B, F
+from code.routeSearch   import get_train_routes, findRoutesDateTime             #Oppgave C, D
+from code.customer      import register_customer, new_order                     #Oppgave E, G
 
 db_path = 'database/railway.db'
 
@@ -23,7 +23,6 @@ def main(fileExists):
         elif funcUser == '4':
             new_order(db_path)
 
-#Connect to the db
 fileExists = True
 if not os.path.exists(db_path):
     fileExists = False

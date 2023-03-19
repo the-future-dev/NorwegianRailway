@@ -3,8 +3,7 @@ import sqlite3
 ##############################################################################
 ## Database definition function
 ##############################################################################
-def create_tables(db_path, file_path='../database/dbDefinition.sql'):
-    print(db_path)
+def create_tables(db_path, file_path='database/dbDefinition.sql'):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
@@ -21,7 +20,7 @@ def create_tables(db_path, file_path='../database/dbDefinition.sql'):
 ## Database basic insertion function:
 ## checkout database/dbDefinition.sql for more information
 ##############################################################################
-def insert_tables(db_path, file_path='../database/dbInsertion.sql'):
+def insert_tables(db_path, file_path='database/dbInsertion.sql'):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
