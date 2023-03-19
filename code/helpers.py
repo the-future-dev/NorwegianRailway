@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from rich.console import Console
 
 console = Console()
@@ -12,7 +12,7 @@ def dateToWeekday(date_string):
     day_of_week = days[date_obj.weekday()]
     return day_of_week
 
-def next_day(day):
+def next_dayOfTheWeek(day):
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     index = days.index(day)
     return days[(index + 1) % len(days)]
@@ -28,3 +28,15 @@ def inputWithFormat(prompt, format=None):
                 console.print(f'Invalid input. Please enter in the format: {format}', style='red')
         else:
             return user_input
+
+def next_day(date_str: str) -> str:
+    # Convert the input string to a datetime object
+    date = datetime.strptime(date_str, '%Y-%m-%d')
+    
+    # Add one day to the date
+    next_date = date + timedelta(days=1)
+    
+    # Convert the resulting date back to a string in the desired format
+    next_date_str = next_date.strftime('%Y-%m-%d')
+    
+    return next_date_str

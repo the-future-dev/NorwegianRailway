@@ -31,7 +31,7 @@ def insert_tables(db_path, file_path='database/dbInsertion.sql'):
     conn.commit()
     
     #Insertion of the Seats
-    for carID in range(3, 7):
+    for carID in range(2, 6):
         for seatNo in range(1, 13):
             c.execute("""INSERT INTO Seat (carID, seatNo) SELECT ?, ? WHERE NOT EXISTS (SELECT * FROM Seat WHERE carID = ? AND seatNo = ?);""", (carID, seatNo, carID, seatNo))
     

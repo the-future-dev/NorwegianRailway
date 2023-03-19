@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS BedTicket (
         ON UPDATE CASCADE
         ON DELETE CASCADE,
 
-    CONSTRAINT fk2 FOREIGN KEY (compartmentNo) REFERENCES Bed(compartmentNo)
+    CONSTRAINT fk2 FOREIGN KEY (compartmentNo) REFERENCES Compartment(compartmentNo)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     CONSTRAINT fk3 FOREIGN KEY (bedNo) REFERENCES Bed(bedNo)
@@ -192,21 +192,12 @@ CREATE TABLE IF NOT EXISTS ChairTicket (
     endingStationName VARCHAR(32) NOT NULL,
     orderID INT NOT NULL,
 
-    CONSTRAINT fk1 FOREIGN KEY (routeID) REFERENCES TrainOccurrence(routeID)
+    CONSTRAINT fk1 FOREIGN KEY (routeID, dateOfOccurrence) REFERENCES TrainOccurrence(routeID, dateOfOccurrence)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    CONSTRAINT fk2 FOREIGN KEY (dateOfOccurrence) REFERENCES TrainOccurrence(dateOfOccurrence)
+    CONSTRAINT fk3 FOREIGN KEY (carID, seatNo) REFERENCES Seat(carID, seatNo)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-
-    
-    CONSTRAINT fk3 FOREIGN KEY (seatNo) REFERENCES Seat(seatNo)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    CONSTRAINT fk4 FOREIGN KEY (carID) REFERENCES Seat(carID)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    
     CONSTRAINT f5 FOREIGN KEY (orderID) REFERENCES CustomerOrder(orderID)
         ON UPDATE CASCADE
         ON DELETE CASCADE,

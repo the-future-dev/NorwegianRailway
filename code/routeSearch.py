@@ -1,6 +1,6 @@
 import sqlite3
 from rich.console import Console
-from code.helpers import dateToWeekday, inputWithFormat, next_day
+from code.helpers import dateToWeekday, inputWithFormat, next_day, next_dayOfTheWeek
 
 console = Console()
 
@@ -76,14 +76,15 @@ def findRoutesDateTime(db_path):
     time = inputWithFormat('Starting Time (format HH:MM): ', '%H:%M')
 
     dayOfTheWeek = dateToWeekday(date)
-    nextDay = next_day(dayOfTheWeek)
+    nextDay = next_dayOfTheWeek(dayOfTheWeek)
+    dateNext = next_day(date)
 
     queryDay1 = """
-                SELECT routeID, operator, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyEndStationName, departureTime, arrivalTime, dayOfTheWeek
+                SELECT routeID, direction, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyStartNo, journeyEndStationName, journeyEndNo, departureTime, arrivalTime, dayOfTheWeek
                 FROM (
-                    SELECT routeID AS routeID_, operator, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyEndStationName, departureTime, arrivalTime
+                    SELECT routeID AS routeID_, direction, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName,journeyStartNo, journeyEndStationName,journeyEndNo, departureTime, arrivalTime
                     FROM TimeTable INNER JOIN (
-                        SELECT routeID AS routeID_, operator, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyStartNo, journeyEndStationName, journeyEndNo
+                        SELECT routeID AS routeID_, direction, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyStartNo, journeyEndStationName, journeyEndNo
                         FROM TrainRoute INNER JOIN (
                                 SELECT TS1.name AS trackName_, P1.stationName AS journeyStartStationName, P1.cardinalNo AS journeyStartNo, P2.stationName AS journeyEndStationName, P2.cardinalNo AS journeyEndNo
                                 FROM TrackSection AS TS1 INNER JOIN Passes AS P1 ON (TS1.name = P1.name) JOIN TrackSection AS TS2 INNER JOIN Passes AS P2 ON (TS2.name = P2.name)
@@ -94,19 +95,15 @@ def findRoutesDateTime(db_path):
                     WHERE TimeTable.stationName = ? AND (TIME(?) <= TIME(departureTime)) --Selection from starting time
                 ) INNER JOIN StartFromStationInDay ON (routeID_ = StartFromStationInDay.routeID)
                 WHERE (dayOfTheWeek = ?)
+                ORDER BY departureTime;
                 """
-    result = c.execute(queryDay1, (staStation, endStation, staStation,time, dayOfTheWeek)).fetchall()
-    if len(result) == 0:
-        console.print(f"! No Result for {dayOfTheWeek}", style='red')
-    else:
-        for row in result:
-            print(row)
+    resultDay1 = c.execute(queryDay1, (staStation, endStation, staStation,time, dayOfTheWeek)).fetchall()
     queryDay2 = """
-                SELECT routeID, operator, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, departureTime, arrivalTime, dayOfTheWeek
+                SELECT routeID, direction, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyStartNo, journeyEndStationName, journeyEndNo, departureTime, arrivalTime, dayOfTheWeek
                 FROM (
-                    SELECT routeID AS routeID_, operator, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, departureTime, arrivalTime
+                    SELECT routeID AS routeID_, direction, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyStartNo, journeyEndStationName, journeyEndNo, departureTime, arrivalTime
                     FROM TimeTable INNER JOIN (
-                        SELECT routeID AS routeID_, operator, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyStartNo, journeyEndNo
+                        SELECT routeID AS routeID_, direction, numberOfChairCars, numberOfSleepingCars, trackName, journeyStartStationName, journeyEndStationName, journeyStartNo, journeyEndNo
                         FROM TrainRoute INNER JOIN (
                                 SELECT TS1.name AS trackName_, P1.stationName AS journeyStartStationName, P1.cardinalNo AS journeyStartNo, P2.stationName AS journeyEndStationName, P2.cardinalNo AS journeyEndNo
                                 FROM TrackSection AS TS1 INNER JOIN Passes AS P1 ON (TS1.name = P1.name) JOIN TrackSection AS TS2 INNER JOIN Passes AS P2 ON (TS2.name = P2.name)
@@ -116,12 +113,24 @@ def findRoutesDateTime(db_path):
                         ) ON (routeID_ = TimeTable.routeID)
                     WHERE TimeTable.stationName = ?
                 ) INNER JOIN StartFromStationInDay ON (routeID_ = StartFromStationInDay.routeID)
-                WHERE (dayOfTheWeek = ?);
+                WHERE (dayOfTheWeek = ?)
+                ORDER BY departureTime;
                 """
-    result = c.execute(queryDay2, (staStation, endStation, staStation, nextDay)).fetchall()
+    resultDay2 = c.execute(queryDay2, (staStation, endStation, staStation, nextDay)).fetchall()
+
+    result = []
+    for row in resultDay1:
+        new_row = row + (date,)
+        result.append(new_row)
+    for row in resultDay2:
+        new_row = row + (dateNext,)
+        result.append(new_row)
+
     if len(result) == 0:
-        console.print(f"! No Result for {nexDay}", style='red')
+        console.print(f"! No Result for {dayOfTheWeek} or {nexDay}", style='red')
     else:
-        for row in result:
-            print(row)
+        for index, row in enumerate(result):
+            print(f'[{index}]: {row}')
     conn.close()
+    
+    return result
