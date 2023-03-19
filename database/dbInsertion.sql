@@ -1,3 +1,7 @@
+--  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- User Story: a
+-- The database should be able to register data about all railway routes in Norway. You should enter data for Nordlandsbanen
+--  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO RailwayStation (stationName, altitude) SELECT 'Trondheim', 5.1 WHERE NOT EXISTS ( SELECT stationName FROM RailwayStation WHERE stationName = 'Trondheim');
 INSERT INTO RailwayStation (stationName, altitude) SELECT 'Steinkjer', 3.6 WHERE NOT EXISTS (SELECT stationName FROM RailwayStation WHERE stationName = 'Steinkjer');
 INSERT INTO RailwayStation (stationName, altitude) SELECT 'Mosjoen', 6.8 WHERE NOT EXISTS (SELECT stationName FROM RailwayStation WHERE stationName = 'Mosjoen');
@@ -20,6 +24,10 @@ INSERT INTO Passes (name, stationName, cardinalNo) SELECT 'NordlandLine', 'Mo i 
 INSERT INTO Passes (name, stationName, cardinalNo) SELECT 'NordlandLine', 'Fauske', 5 WHERE NOT EXISTS (SELECT * FROM Passes WHERE name = 'NordlandLine' AND stationName = 'Fauske');
 INSERT INTO Passes (name, stationName, cardinalNo) SELECT 'NordlandLine', 'Bodo', 6 WHERE NOT EXISTS (SELECT * FROM Passes WHERE name = 'NordlandLine' AND stationName = 'Bodo');
 
+--  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- User Story: b
+-- You are supposed to register data about train routes. You should enter data for the three train routes on Nordlandsbanen described in the appendix to this task.
+--  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO TrainRoute (operator, direction,startStationCardinalNo,endStationCardinalNo, numberOfChairCars, numberOfSleepingCars, trackName) SELECT 'SJ', 0, 1, 6, 2, 0, 'NordlandLine' WHERE NOT EXISTS (SELECT * FROM TrainRoute WHERE routeID = 1);
 INSERT INTO TrainRoute (operator, direction,startStationCardinalNo,endStationCardinalNo, numberOfChairCars, numberOfSleepingCars, trackName) SELECT 'SJ', 0, 1, 6, 1, 1, 'NordlandLine' WHERE NOT EXISTS (SELECT * FROM TrainRoute WHERE routeID = 2);
 INSERT INTO TrainRoute (operator, direction,startStationCardinalNo,endStationCardinalNo, numberOfChairCars, numberOfSleepingCars, trackName) SELECT 'SJ', 1, 4, 1, 1, 0, 'NordlandLine' WHERE NOT EXISTS (SELECT * FROM TrainRoute WHERE routeID = 3);
@@ -88,7 +96,11 @@ INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES 
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (3, 'Trondheim', NULL, '14:13');
  
 
- -- task E ------------------------------ --Date: YYYY-MM-DD
+--  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- User Story: f
+-- Necessary data should be entered for the system to handle purchasing of tickets for the three train routes on Nordlandsbanen
+-- Monday April 3rd and Tuesday April 4th of this year.
+--  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-03', 1);
 INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-03', 2);
 INSERT INTO TrainOccurrence (dateOfOccurrence, routeID) VALUES ('2023-04-03', 3);
