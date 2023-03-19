@@ -77,7 +77,13 @@ INSERT INTO Compartment (carID, compartmentNo) VALUES (1,2);
 INSERT INTO Compartment (carID, compartmentNo) VALUES (1,3);
 INSERT INTO Compartment (carID, compartmentNo) VALUES (1,4);
 
-INSERT INTO Bed(carID, compartmentNo, bedNo) VALUES (1, 1, 1);
+-- 1: 2 chair, 0 sleep | 2: 1 chair, 1 sleep | 3: 1 chair, 0 sleep
+INSERT INTO CarInRoute (routeID, carID, cardinalNo) VALUES (1, 2, 1);
+INSERT INTO CarInRoute (routeID, carID, cardinalNo) VALUES (1, 3, 2);
+INSERT INTO CarInRoute (routeID, carID, cardinalNo) VALUES (2, 4, 1);
+INSERT INTO CarInRoute (routeID, carID, cardinalNo) VALUES (2, 1, 2);
+INSERT INTO CarInRoute (routeID, carID, cardinalNo) VALUES (3, 5, 1);
+
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (1, 'Trondheim', '07:49', NULL);
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (1, 'Steinkjer', '09:51', '09:46');
 INSERT INTO TimeTable (routeID, stationName, departureTime, arrivalTime) VALUES (1, 'Mosjoen', '13:20', '13:15');

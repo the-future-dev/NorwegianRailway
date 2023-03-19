@@ -74,6 +74,15 @@ def new_order(db_path):
 
         #TO comment
         console.print(f'\nLogged In !', style='green')
+        funcUser = ''
+        while True:
+            funcUser = input('\n Ticket Shop: \n [1] Buy a ticket for a Chair \n [2] Buy a ticket for a Bed \n [0] Exit Ticket Shop \n \t>')
+            if funcUser == '0':
+                break
             
+            # if funcUser == '1':
+            #     get_train_routes(db_path)
+            # elif funcUser == '2':
+            #     findRoutesDateTime(db_path)
     
     conn.close()
