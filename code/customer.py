@@ -50,6 +50,51 @@ def register_customer(db_path):
 RED = '\033[31m'
 GREEN = '\033[32m'
 RESET = '\033[0m'
+def buy_bed_ticket(occurrence, c, conn, orderID):
+    routeID = int(occurrence[0])
+    direction = int(occurrence[1])
+    nChairCars = int(occurrence[2])
+    nSleepCars = int(occurrence[3])
+    routeName = occurrence[4]
+    startingStationName = occurrence[5]
+    sNo = int(occurrence[6])
+    endingStationName = occurrence[7]
+    eNo = int(occurrence[8])
+    date = occurrence[12]
+
+    query = """
+                SELECT routeID, SleepingCar.carID AS carID, cardinalNo, compartmentNo, bedNo
+                FROM SleepingCar INNER JOIN CarInRoute USING (carID)INNER JOIN Bed USING (carID)
+                WHERE routeID = ? AND (routeID, carID, compartmentNo) NOT IN (
+                    SELECT routeID, carID, compartmentNo
+                    FROM BedTicket
+                    WHERE dateOfOccurrence = ?
+                );
+            """
+    c.execute(query, (routeID, date))
+    beds = c.fetchall()
+
+    if beds is None:
+        console.log("No bed available", style='red')
+    else:
+        for i in range(nChairCars, nChairCars+nSleepCars+1):
+            bedsForChair = []
+            for j in range(1, 5):
+                for k in range(1, 3):
+                    bed = 'NA'
+                    for el in beds:
+                        if el[1] == i and el[2] == j and el[3] == k:
+                            bed = 'AV'
+                    bedsForChair.append(bed)
+            print(f"Car #{i}:")
+            print(f"Compartment #1 | Bed 1: {GREEN if bedsForChair[0] == 'AV' else RED}{bedsForChair[0]}{RESET} | Bed 2: {GREEN if bedsForChair[1] == 'AV' else RED}{bedsForChair[1]}{RESET}")
+            print(f"Compartment #2 | Bed 1: {GREEN if bedsForChair[2] == 'AV' else RED}{bedsForChair[2]}{RESET} | Bed 2: {GREEN if bedsForChair[3] == 'AV' else RED}{bedsForChair[3]}{RESET}")
+            print(f"Compartment #3 | Bed 1: {GREEN if bedsForChair[4] == 'AV' else RED}{bedsForChair[4]}{RESET} | Bed 2: {GREEN if bedsForChair[5] == 'AV' else RED}{bedsForChair[5]}{RESET}")
+            print(f"Compartment #4 | Bed 1: {GREEN if bedsForChair[6] == 'AV' else RED}{bedsForChair[6]}{RESET} | Bed 2: {GREEN if bedsForChair[7] == 'AV' else RED}{bedsForChair[7]}{RESET}")
+    
+    carID = input("Select the car: ")
+    bed   = input("Select the bed: ")
+
 
 def buy_chair_ticket(occurrence, c, conn, orderID):
     # [0]: routeID [1]: direction [2]: nChairCars [3]: nSleepCars [4]: routeName

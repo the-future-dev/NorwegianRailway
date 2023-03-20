@@ -150,21 +150,11 @@ CREATE TABLE IF NOT EXISTS BedTicket (
     
     CONSTRAINT onceBooking UNIQUE (carID, compartmentNo, bedNo, dateOfOccurrence, routeID),
 
-    CONSTRAINT fk1 FOREIGN KEY (carID) REFERENCES Bed(carID)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk2 FOREIGN KEY (compartmentNo) REFERENCES Compartment(compartmentNo)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    CONSTRAINT fk3 FOREIGN KEY (bedNo) REFERENCES Bed(bedNo)
+    CONSTRAINT fk1 FOREIGN KEY (carID, compartmentNo, bedNo) REFERENCES Bed(carID, compartmentNo, bedNo)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     
-    CONSTRAINT fk4 FOREIGN KEY (dateOfOccurrence) REFERENCES TrainOccurrence(dateOfOccurrence)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    CONSTRAINT fk5 FOREIGN KEY (routeID) REFERENCES TrainOccurrence(routeID)
+    CONSTRAINT fk4 FOREIGN KEY (routeID, dateOfOccurrence) REFERENCES TrainOccurrence(routeID, dateOfOccurrence)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
 
