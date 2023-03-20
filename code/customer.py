@@ -4,7 +4,7 @@ from datetime import datetime
 from rich.console import Console
 from code.routeSearch import findRoutesDateTime
 
-console = Console()
+console = Console(color_system="256")
 
 ##############################################################################################################
 ## User Story: e
@@ -15,10 +15,15 @@ def register_customer(db_path):
     c = conn.cursor()
 
     #user input validation 
-    name = input('> Enter your name: ')
+    while True:
+        name = input('> Enter your name: ')
+        if (re.match(r"^[a-zA-Z\s]*$", name)):
+            break
+        console.print("! Invalid name. Only letters and spaces are allowed. No special letters. Please try again.", style= 'red')
+
     while True:
         email = input('> Enter your email: ')
-        if re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        if re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
             break
         console.print("! Invalid email format. Please try again.", style= 'red')
     
@@ -27,6 +32,7 @@ def register_customer(db_path):
         if re.match(r"^\d{8}$", phone):
             break
         console.print("! Invalid phone number. Please enter a valid 8-digit phone number.", style='red')
+    
     #Insertion of the new user, just if it doesn't exist already
     c.execute("SELECT * FROM Customer WHERE name=? AND email=? AND phone=?", (name, email, int(phone)))
     if c.fetchone() is None:
@@ -210,9 +216,19 @@ def new_order(db_path):
     print('You can buy tickets for the three main routes:')
     
     name = input('Enter your name: ')
+    if (not re.match(r"^[a-zA-Z\s]*$", name)):
+        return
+    
     email = input('Enter your email: ')
-    phone = int(input('Enter your phone number: '))
-
+    if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+        print("Invalid email.")
+        return
+    
+    phone = input('Enter your phone number: ')
+    if not re.match(r"^\d{8}$", phone):
+        print("Invalid phone number. Only 10 digits are allowed.")
+        return
+    
     # Check if the user exists
     query = "SELECT customerID FROM Customer WHERE name=? AND email=? AND phone=?;"
     c.execute(query, (name, email, phone))
@@ -252,27 +268,116 @@ def new_order(db_path):
                     occurrenceExists.append(route)
             
             if len(occurrenceExists) != 0:
-                if (len(occurrenceExists) == len(possibleRoutes)):
-                    console.print(" All the routes are available to be booked", style='green')
-                else:
-                    console.print("\n! Not all the routes are available\n", style='yellow')
-                    console.print("\AVAILABLE ROUTES:", style='green')
-                    for index, row in enumerate(occurrenceExists):
-                        console.print(f'[{index}]: {row[-2]} the {row[-1]} at {row[9]} {row[4]} N-{row[0]} will pass from {row[5]} to {row[7]}. The train has {row[2]} seats cars and {row[3]} sleeping cars.', style='blue')
-                
-                idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
-                if not (0 <= idx < len(occurrenceExists)):
+                    if (len(occurrenceExists) == len(possibleRoutes)):
+                        console.print(" All the routes are available to be booked", style='green')
+                    else:
+                        console.print("\n! Not all the routes are available to be booked\n", style='yellow')
+                        console.print("! AVAILABLE ROUTES:", style='blue')
+                        for index, row in enumerate(occurrenceExists):
+                            console.print(f'[{index}]: {row[-2]} the {row[-1]} at {row[9]} {row[4]} N-{row[0]} will pass from {row[5]} to {row[7]}. The train has {row[2]} seats cars and {row[3]} sleeping cars.', style='blue')
+                    
                     idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
-                
-                funcUser = input('\n Ticket Shop: \n [1] Buy a Ticket for a Chair \n [2] Buy a ticket for a Bed \n \t>')
-                
-                if funcUser == '1':
-                    buy_chair_ticket(occurrenceExists[idx], c, conn, orderID)
-                elif funcUser == '2' and occurrenceExists[idx][3] != 0:
-                    buy_bed_ticket(occurrenceExists[idx], c, conn, orderID)
-                elif funcUser == '2' and occurrenceExists[idx][3] == 0:
-                    console.print("No Sleeping Car for the selected train :<", style='red')
+                    if not (0 <= idx < len(occurrenceExists)):
+                        idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
+                    
+                    funcUser = input('\n Inside Ticket Shop: \n [1] Buy a Ticket for a Chair \n [2] Buy a ticket for a Bed \n [0] Exit\n \t>')
+                    
+                    if funcUser == '1':
+                        buy_chair_ticket(occurrenceExists[idx], c, conn, orderID)
+                    elif funcUser == '2' and occurrenceExists[idx][3] != 0:
+                        buy_bed_ticket(occurrenceExists[idx], c, conn, orderID)
+                    elif funcUser == '2' and occurrenceExists[idx][3] == 0:
+                        console.print("No Sleeping Car for the selected train :<", style='red')
             else:
                 console.print("! All the routes are sheduled but it's too early to book them, come back later", style='red')
 
     conn.close()
+
+
+##############################################################################################################################################
+## User Story: h
+## All information about purchases made for future trips should be available for a user. This 
+## functionality should be programmed
+##############################################################################################################################################
+
+import re
+import sqlite3
+
+def get_orders(db_path):
+    name = input("Enter your name: ")
+    email = input("Enter your email: ")
+    phone = input("Enter your phone number: ")
+
+    # Validate name
+    if not re.match(r"^[a-zA-Z\s]*$", name):
+        print("Invalid name. Only letters and spaces are allowed. No special letters.")
+        return
+
+    # Validate email
+    if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+        print("Invalid email.")
+        return
+
+    # Validate phone number
+    if not re.match(r"^\d{8}$", phone):
+        print("Invalid phone number. Only 10 digits are allowed.")
+        return
+
+    # Connect to the SQLite database
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+
+    # Execute the query to retrieve the customerID
+    c.execute("SELECT DISTINCT customerID FROM Customer WHERE name = ? AND email = ? AND phone = ?;", (name, email, phone))
+    
+    customerID = c.fetchone()
+    
+    if customerID:
+        # print(f"The customer ID is {customerID[0]}")
+        
+        # Retrieve bed ticket orders
+        c.execute("""SELECT purchaseTime, purchaseDate, routeID, carID, compartmentNo, bedNo,
+                     dateOfOccurrence, startingStationName, endingStationName FROM CustomerOrder 
+                     LEFT JOIN BedTicket ON CustomerOrder.orderID = BedTicket.orderID 
+                     WHERE CustomerOrder.customerID = ? AND ticketID NOT NULL;""", (customerID[0],))
+        
+        bed_ticket_orders = c.fetchall()
+        
+        if bed_ticket_orders:
+            print("\nBed Ticket Orders:")
+            for order in bed_ticket_orders:
+                purchase_time, purchase_date, route_id, car_id,\
+                compartment_no, bed_no,date_of_occurrence,\
+                starting_station_name,\
+                ending_station_name= order
+                
+                print(f"\nPurchase Time: {purchase_time}\nPurchase Date: {purchase_date}\nRoute ID: {route_id}\nCar ID: {car_id}\nCompartment No.: {compartment_no}\nBed No.: {bed_no}\nDate of Occurrence: {date_of_occurrence}\nStarting Station Name: {starting_station_name}\nEnding Station Name: {ending_station_name}")
+        else:
+            console.print("No bed tickets", style='red')
+        
+        # Retrieve chair ticket orders
+        c.execute("""SELECT purchaseTime,purchaseDate,
+                     routeID,
+                     carID,
+                     seatNo,
+                     dateOfOccurrence,
+                     startingStationName,
+                     endingStationName FROM CustomerOrder 
+                     LEFT JOIN ChairTicket ON CustomerOrder.orderID=ChairTicket.orderID 
+                     WHERE CustomerOrder.customerID=? AND ticketID NOT NULL;""",(customerID[0],))
+        
+        chair_ticket_orders=c.fetchall()
+        
+        if chair_ticket_orders:
+            print("\nChair Ticket Orders:")
+            for order in chair_ticket_orders:
+                purchase_time,purchase_date,\
+                route_id,\
+                car_id,\
+                seat_no,date_of_occurrence,\
+                starting_station_name,\
+                ending_station_name=order
+                
+                print(f"\nPurchase Time:{purchase_time}\nPurchase Date:{purchase_date}\nRoute ID:{route_id}\nCar ID:{car_id}\nSeat No.:{seat_no}\nDate of Occurrence:{date_of_occurrence}\nThe Starting Station Name:{starting_station_name} \nThe Ending Station Name:{ending_station_name}")
+        else:
+            console.print("No chair tickets", style='red')

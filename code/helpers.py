@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from rich.console import Console
 
-console = Console()
+console = Console(color_system="256")
 
 class TimeFormatError(Exception()):
     pass
