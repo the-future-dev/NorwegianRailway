@@ -50,6 +50,21 @@ def register_customer(db_path):
 RED = '\033[31m'
 GREEN = '\033[32m'
 RESET = '\033[0m'
+
+def bedAvailable(beds, compartmentNo, bedNo):
+    found = False
+    for b in beds:
+        if b[-1] == bedNo and b[-2] == compartmentNo:
+            found = True
+            break
+    return found
+
+def coloredPrintBed(beds, compartment, bedNo):
+    if bedAvailable(beds, compartment, bedNo):
+        return f'{GREEN}AV{RESET}'
+    else:
+        return f'{RED}NA{RESET}'
+    
 def buy_bed_ticket(occurrence, c, conn, orderID):
     routeID = int(occurrence[0])
     direction = int(occurrence[1])
@@ -63,7 +78,7 @@ def buy_bed_ticket(occurrence, c, conn, orderID):
     date = occurrence[12]
 
     query = """
-                SELECT routeID, SleepingCar.carID AS carID, cardinalNo, compartmentNo, bedNo
+                SELECT routeID, SleepingCar.carID AS carID, compartmentNo, bedNo
                 FROM SleepingCar INNER JOIN CarInRoute USING (carID)INNER JOIN Bed USING (carID)
                 WHERE routeID = ? AND (routeID, carID, compartmentNo) NOT IN (
                     SELECT routeID, carID, compartmentNo
@@ -72,29 +87,43 @@ def buy_bed_ticket(occurrence, c, conn, orderID):
                 );
             """
     c.execute(query, (routeID, date))
-    beds = c.fetchall()
-
-    if beds is None:
-        console.log("No bed available", style='red')
-    else:
-        for i in range(nChairCars, nChairCars+nSleepCars+1):
-            bedsForChair = []
-            for j in range(1, 5):
-                for k in range(1, 3):
-                    bed = 'NA'
-                    for el in beds:
-                        if el[1] == i and el[2] == j and el[3] == k:
-                            bed = 'AV'
-                    bedsForChair.append(bed)
-            print(f"Car #{i}:")
-            print(f"Compartment #1 | Bed 1: {GREEN if bedsForChair[0] == 'AV' else RED}{bedsForChair[0]}{RESET} | Bed 2: {GREEN if bedsForChair[1] == 'AV' else RED}{bedsForChair[1]}{RESET}")
-            print(f"Compartment #2 | Bed 1: {GREEN if bedsForChair[2] == 'AV' else RED}{bedsForChair[2]}{RESET} | Bed 2: {GREEN if bedsForChair[3] == 'AV' else RED}{bedsForChair[3]}{RESET}")
-            print(f"Compartment #3 | Bed 1: {GREEN if bedsForChair[4] == 'AV' else RED}{bedsForChair[4]}{RESET} | Bed 2: {GREEN if bedsForChair[5] == 'AV' else RED}{bedsForChair[5]}{RESET}")
-            print(f"Compartment #4 | Bed 1: {GREEN if bedsForChair[6] == 'AV' else RED}{bedsForChair[6]}{RESET} | Bed 2: {GREEN if bedsForChair[7] == 'AV' else RED}{bedsForChair[7]}{RESET}")
+    beds = c.fetchall() # [0] routeID, [1] carID, [2] cardinalNo, [3] compartmentNo, [4] bedNo
+    if beds is not None:
+        # As the implemenattion just has one car that's with bed the function is simplified
+        print(f"Car #1:")
+        print(f"Compartment #{1} | Bed 1: {coloredPrintBed(beds, 1, 1)} | Bed 2: {coloredPrintBed(beds, 1, 2)}")
+        print(f"Compartment #{2} | Bed 1: {coloredPrintBed(beds, 2, 1)} | Bed 2: {coloredPrintBed(beds, 2, 2)}")
+        print(f"Compartment #{3} | Bed 1: {coloredPrintBed(beds, 3, 1)} | Bed 2: {coloredPrintBed(beds, 3, 2)}")
+        print(f"Compartment #{4} | Bed 1: {coloredPrintBed(beds, 4, 1)} | Bed 2: {coloredPrintBed(beds, 4, 2)}")
     
-    carID = input("Select the car: ")
-    bed   = input("Select the bed: ")
-
+        while True:
+            #carNo           = int(input("Select the car: "))
+            compartmentNo   = int(input("Select the compartment: "))
+            bedNo             = int(input("Select the number of beds (1 or 2): "))
+            if bedAvailable(beds, compartmentNo, bedNo):
+                break
+            else:
+                console.print("The selected car and seat are not available. Please try again.", style='red')
+        
+        carID = 1
+        if carID is not None:
+            #############################
+            ##INSERTION
+            #############################
+            query = "INSERT INTO BedTicket (carID, compartmentNo, bedNo, dateOfOccurrence, routeID, orderID, startingStationName, endingStationName) VALUES (?,?,?,?,?,?,?,?);"
+            try:
+                c.execute(query, (carID, compartmentNo, 1, date, routeID, orderID, startingStationName, endingStationName))
+                conn.commit()
+                if bedNo == 2:
+                    c.execute(query, (carID, compartmentNo, 2, date, routeID, orderID, startingStationName, endingStationName))
+                    conn.commit()
+                console.print("Purchase Successful", style="green")
+            except Exception as e:
+                console.print(f"! Unsuccessful Purchase: {e}", style="red")
+        else:
+            console.print(f"! Unsuccessful Selection")
+    else:
+        console.print(f"! Unsuccessful Selection")
 
 def buy_chair_ticket(occurrence, c, conn, orderID):
     # [0]: routeID [1]: direction [2]: nChairCars [3]: nSleepCars [4]: routeName
@@ -129,6 +158,7 @@ def buy_chair_ticket(occurrence, c, conn, orderID):
     if chairs is None:
         console.print("No seats available", style='red')
     else:
+        availableSeats = []
         for i in range(1, nChairCars+1):
             seatsForCar = []
             for j in range(1, 13):
@@ -136,6 +166,7 @@ def buy_chair_ticket(occurrence, c, conn, orderID):
                 for el in chairs:
                     if el[2] == i and el[3] == j:
                         seat = 'AV'
+                        availableSeats.append((i, j))
                 seatsForCar.append(seat)
             print(f"Car #{i}: ")
             print("__________________________________________")
@@ -144,28 +175,35 @@ def buy_chair_ticket(occurrence, c, conn, orderID):
             print(f"[] 9 {GREEN if seatsForCar[8] == 'AV' else RED}{seatsForCar[8]}{RESET} | 10 {GREEN if seatsForCar[9] == 'AV' else RED}{seatsForCar[9]}{RESET}|\t| 11 {GREEN if seatsForCar[10] == 'AV' else RED}{seatsForCar[10]}{RESET} | 12 {GREEN if seatsForCar[11] == 'AV' else RED}{seatsForCar[11]}{RESET} []")
             print("__________________________________________\n\n")
     
-    #############################
-    ##SELECTION
-    #############################
-    carNo = int(input("Select the car: "))
-    seat = int(input("Select the seat: "))
-    
-    query = "SELECT DISTINCT carID FROM CarInRoute WHERE routeID = ? AND cardinalNo = ?;"
-    c.execute(query, (routeID, carNo))
-    carID = c.fetchone()[0]
-    if carID is not None:
         #############################
-        ##INSERTION
+        ##SELECTION
         #############################
-        query = "INSERT INTO ChairTicket (carID, seatNo, dateOfOccurrence, routeID, startingStationName, endingStationName, orderID) VALUES (?,?,?,?,?,?,?);"
-        try:
-            c.execute(query, (carID, seat, date, routeID, startingStationName, endingStationName, orderID))
-            conn.commit()
-            console.print("Purchase Successful", style="green")
-        except Exception as e:
-            console.print(f"! Unsuccessful Purchase: {e}", style="red")
-    else:
-        console.print(f"! Unsuccessful Selection")
+        while True:
+            carNo = int(input("Select the car: "))
+            seat = int(input("Select the seat: "))
+            if (carNo, seat) in availableSeats:
+                break
+            else:
+                console.print("The selected car and seat are not available. Please try again.", style='red')
+        
+        query = "SELECT DISTINCT carID FROM CarInRoute WHERE routeID = ? AND cardinalNo = ?;"
+        c.execute(query, (routeID, carNo))
+        carID = c.fetchone()[0]
+        if carID is not None:
+            #############################
+            ##INSERTION
+            #############################
+            query = "INSERT INTO ChairTicket (carID, seatNo, dateOfOccurrence, routeID, startingStationName, endingStationName, orderID) VALUES (?,?,?,?,?,?,?);"
+            try:
+                c.execute(query, (carID, seat, date, routeID, startingStationName, endingStationName, orderID))
+                conn.commit()
+                console.print("Purchase Successful", style="green")
+            except Exception as e:
+                console.print(f"! Unsuccessful Purchase: {e}", style="red")
+        else:
+            console.print(f"! Unsuccessful Selection")
+
+
 def new_order(db_path):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
@@ -218,22 +256,22 @@ def new_order(db_path):
                     console.print(" All the routes are available to be booked", style='green')
                 else:
                     console.print("\n! Not all the routes are available\n", style='yellow')
-                    console.print("\nAvailable routes", style='green')
+                    console.print("\AVAILABLE ROUTES:", style='green')
                     for index, row in enumerate(occurrenceExists):
-                        print(f'[{index}]: {row}')
+                        console.print(f'[{index}]: {row[-2]} the {row[-1]} at {row[9]} {row[4]} N-{row[0]} will pass from {row[5]} to {row[7]}. The train has {row[2]} seats cars and {row[3]} sleeping cars.', style='blue')
                 
                 idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
                 if not (0 <= idx < len(occurrenceExists)):
                     idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
                 
                 funcUser = input('\n Ticket Shop: \n [1] Buy a Ticket for a Chair \n [2] Buy a ticket for a Bed \n \t>')
+                
                 if funcUser == '1':
                     buy_chair_ticket(occurrenceExists[idx], c, conn, orderID)
-                elif funcUser == '2':
-                    # buy_bed_ticket(occurrenceExists[idx])
-                    break
-                else:
-                    break
+                elif funcUser == '2' and occurrenceExists[idx][3] != 0:
+                    buy_bed_ticket(occurrenceExists[idx], c, conn, orderID)
+                elif funcUser == '2' and occurrenceExists[idx][3] == 0:
+                    console.print("No Sleeping Car for the selected train :<", style='red')
             else:
                 console.print("! All the routes are sheduled but it's too early to book them, come back later", style='red')
 

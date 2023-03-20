@@ -129,8 +129,9 @@ def findRoutesDateTime(db_path):
     if len(result) == 0:
         console.print(f"! No Result for {dayOfTheWeek} or {nextDay}", style='red')
     else:
+        console.print("[Index]: Routes Scheduled",style='blue')
         for index, row in enumerate(result):
-            print(f'[{index}]: {row}')
+            console.print(f'[{index}]: {row[-2]} the {row[-1]} at {row[9]} {row[4]} N-{row[0]} will pass from {row[5]} to {row[7]}. The train has {row[2]} seats cars and {row[3]} sleeping cars.', style='blue')
     conn.close()
     
     return result
