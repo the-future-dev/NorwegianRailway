@@ -51,17 +51,19 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 RESET = '\033[0m'
 
-def buy_chair_ticket(occurrence, c):
+def buy_chair_ticket(occurrence, c, conn, orderID):
     # [0]: routeID [1]: direction [2]: nChairCars [3]: nSleepCars [4]: routeName
     # [5]: startingStation [6]: startNo [7]: endingStation [8]: endNo
     # [9]:: timeDeparture [10]: timeArrival [11]: DayOfTheWeek [12]: date
-    routeID = occurrence[0]
-    direction = occurrence[1]
-    nChairCars = occurrence[2]
-    nSleepCars = occurrence[3]
+    routeID = int(occurrence[0])
+    direction = int(occurrence[1])
+    nChairCars = int(occurrence[2])
+    nSleepCars = int(occurrence[3])
     routeName = occurrence[4]
-    sNo = occurrence[6]
-    eNo = occurrence[8]
+    startingStationName = occurrence[5]
+    sNo = int(occurrence[6])
+    endingStationName = occurrence[7]
+    eNo = int(occurrence[8])
     date = occurrence[12]
 
     #fetching the Available Seats in the route
@@ -78,33 +80,47 @@ def buy_chair_ticket(occurrence, c):
                 );
             """
     c.execute(query, (routeID, date, direction, sNo, sNo, eNo, eNo,sNo, eNo, direction, sNo, sNo, eNo, eNo, eNo, sNo))
-    result = c.fetchall() # [0] routeID, [1] carID, [2] cardinalNo, [3] seatNo
-    if result is None:
+    chairs = c.fetchall() # [0] routeID, [1] carID, [2] cardinalNo, [3] seatNo
+    if chairs is None:
         console.print("No seats available", style='red')
     else:
         for i in range(1, nChairCars+1):
             seatsForCar = []
             for j in range(1, 13):
                 seat = 'NA'
-                for el in result:
+                for el in chairs:
                     if el[2] == i and el[3] == j:
                         seat = 'AV'
                 seatsForCar.append(seat)
-            print(f"Car [{i}]:")
-            print("__________________________________")
-            print(f"[] 1 {GREEN if seatsForCar[0] == 'AV' else RED}{seatsForCar[0]}{RESET} | 2 {GREEN if seatsForCar[1] == 'AV' else RED}{seatsForCar[1]}{RESET}|\t| 3 {GREEN if seatsForCar[2] == 'AV' else RED}{seatsForCar[2]}{RESET} | 4 {GREEN if seatsForCar[3] == 'AV' else RED}{seatsForCar[3]}{RESET} []")
-            print(f"[] 5 {GREEN if seatsForCar[4] == 'AV' else RED}{seatsForCar[4]}{RESET} | 6 {GREEN if seatsForCar[5] == 'AV' else RED}{seatsForCar[5]}{RESET}|\t| 7 {GREEN if seatsForCar[6] == 'AV' else RED}{seatsForCar[6]}{RESET} | 8 {GREEN if seatsForCar[7] == 'AV' else RED}{seatsForCar[7]}{RESET} []")
-            print(f"[] 9 {GREEN if seatsForCar[8] == 'AV' else RED}{seatsForCar[8]}{RESET} | 10 {GREEN if seatsForCar[9] == 'AV' else RED}{seatsForCar[9]}{RESET}|\t| 11 {GREEN if seatsForCar[10] == 'AV' else RED}{seatsForCar[10]}{RESET} | 12 {GREEN if seatsForCar[11] == 'AV' else RED}{seatsForCar[11]}{RESET} []\n\n")
-            print("__________________________________")
-
+            print(f"Car #{i}: ")
+            print("__________________________________________")
+            print(f"[] 1 {GREEN if seatsForCar[0] == 'AV' else RED}{seatsForCar[0]}{RESET} | 2  {GREEN if seatsForCar[1] == 'AV' else RED}{seatsForCar[1]}{RESET}|\t| 3  {GREEN if seatsForCar[2] == 'AV' else RED}{seatsForCar[2]}{RESET} | 4  {GREEN if seatsForCar[3] == 'AV' else RED}{seatsForCar[3]}{RESET} []")
+            print(f"[] 5 {GREEN if seatsForCar[4] == 'AV' else RED}{seatsForCar[4]}{RESET} | 6  {GREEN if seatsForCar[5] == 'AV' else RED}{seatsForCar[5]}{RESET}|\t| 7  {GREEN if seatsForCar[6] == 'AV' else RED}{seatsForCar[6]}{RESET} | 8  { GREEN if seatsForCar[7] == 'AV' else RED}{seatsForCar[7]}{RESET} []")
+            print(f"[] 9 {GREEN if seatsForCar[8] == 'AV' else RED}{seatsForCar[8]}{RESET} | 10 {GREEN if seatsForCar[9] == 'AV' else RED}{seatsForCar[9]}{RESET}|\t| 11 {GREEN if seatsForCar[10] == 'AV' else RED}{seatsForCar[10]}{RESET} | 12 {GREEN if seatsForCar[11] == 'AV' else RED}{seatsForCar[11]}{RESET} []")
+            print("__________________________________________\n\n")
+    
     #############################
     ##SELECTION
     #############################
-    ##INSERTION
-    #############################
-
-    return 'ciao'
-
+    carNo = int(input("Select the car: "))
+    seat = int(input("Select the seat: "))
+    
+    query = "SELECT DISTINCT carID FROM CarInRoute WHERE routeID = ? AND cardinalNo = ?;"
+    c.execute(query, (routeID, carNo))
+    carID = c.fetchone()[0]
+    if carID is not None:
+        #############################
+        ##INSERTION
+        #############################
+        query = "INSERT INTO ChairTicket (carID, seatNo, dateOfOccurrence, routeID, startingStationName, endingStationName, orderID) VALUES (?,?,?,?,?,?,?);"
+        try:
+            c.execute(query, (carID, seat, date, routeID, startingStationName, endingStationName, orderID))
+            conn.commit()
+            console.print("Purchase Successful", style="green")
+        except Exception as e:
+            console.print(f"! Unsuccessful Purchase: {e}", style="red")
+    else:
+        console.print(f"! Unsuccessful Selection")
 def new_order(db_path):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
@@ -132,6 +148,10 @@ def new_order(db_path):
         c.execute(query, (purchaseTime, purchaseDate, customerID))
         conn.commit()
 
+        query = "select orderID from CustomerOrder WHERE purchaseTime = ? AND purchaseDate = ? AND customerID = ?"
+        c.execute(query, (purchaseTime, purchaseDate, customerID))
+        orderID = int(c.fetchone()[0])
+
         #TO comment
         console.print(f'\nLogged In !', style='green')
         funcUser = ''
@@ -158,12 +178,12 @@ def new_order(db_path):
                         print(f'[{index}]: {row}')
                 
                 idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
-                # if not (0 <= idx < len(occurrenceExists)):
-                #     idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
+                if not (0 <= idx < len(occurrenceExists)):
+                    idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
                 
                 funcUser = input('\n Ticket Shop: \n [1] Buy a Ticket for a Chair \n [2] Buy a ticket for a Bed \n \t>')
                 if funcUser == '1':
-                    buy_chair_ticket(occurrenceExists[idx], c)
+                    buy_chair_ticket(occurrenceExists[idx], c, conn, orderID)
                 elif funcUser == '2':
                     # buy_bed_ticket(occurrenceExists[idx])
                     break

@@ -127,7 +127,7 @@ def findRoutesDateTime(db_path):
         result.append(new_row)
 
     if len(result) == 0:
-        console.print(f"! No Result for {dayOfTheWeek} or {nexDay}", style='red')
+        console.print(f"! No Result for {dayOfTheWeek} or {nextDay}", style='red')
     else:
         for index, row in enumerate(result):
             print(f'[{index}]: {row}')
