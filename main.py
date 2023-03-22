@@ -10,7 +10,15 @@ def main(fileExists):
     if not fileExists: 
         create_tables(db_path)
         insert_tables(db_path)
-    print('\nWelcome to Norwegian Railways!')
+    print(" _   _                               _               _____       _ _                     ")
+    print("| \ | |                             (_)             |  __ \     (_) |                    ")
+    print("|  \| | ___  _ ____      _____  __ _ _  __ _ _ __   | |__) |__ _ _| |_      ____ _ _   _ ")
+    print("| . ` |/ _ \| '__\ \ /\ / / _ \/ _` | |/ _` | '_ \  |  _  // _` | | \ \ /\ / / _` | | | |")
+    print("| |\  | (_) | |   \ V  V /  __/ (_| | | (_| | | | | | | \ \ (_| | | |\ V  V / (_| | |_| |")
+    print("|_| \_|\___/|_|    \_/\_/ \___|\__, |_|\__,_|_| |_| |_|  \_\__,_|_|_| \_/\_/ \__,_|\__, |")
+    print("                                __/ |                                               __/ |")
+    print("                               |___/                                               |___/ ")
+ 
     funcUser = '' 
     while funcUser != '0':
         funcUser = input('\n MENU: \n [1] Get all train routes that stop at a particular station on a given weekday \n [2] Search Routes \n [3] Signup \n [4] Buy Tickets \n [5] Retrieve orders\n [0] Exit \n > ')
