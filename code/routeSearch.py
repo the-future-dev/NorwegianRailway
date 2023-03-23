@@ -1,5 +1,6 @@
 import sqlite3
 from rich.console import Console
+from rich.text import Text
 from code.helpers import dateToWeekday, inputWithFormat, next_day, next_dayOfTheWeek
 
 console = Console(color_system="256")
@@ -145,10 +146,18 @@ def findRoutesDateTime(db_path):
     if len(result) == 0:
         console.print(f"! No Result for {dayOfTheWeek} or {nextDay}", style='red')
     else:
-        console.print("[Index]: Routes Scheduled",style='blue')
+        console.print("Routes Scheduled",style='cyan')
         for index, row in enumerate(result):
-            console.print(f'[{index}]: {row[-2]} the {row[-1]} at {row[9]} {row[4]} N-{row[0]} will pass from {row[5]} to {row[7]}. The train has {row[2]} seats cars and {row[3]} sleeping cars.', style='blue')
-
+            text = Text(f'Index ', style='bold')
+            text.append(f'{index}', style='#FFAF00')
+            text.append(f':\t N-{row[0]} will pass on {row[-2]} the {row[-1]} at ')
+            text.append(f'{row[9]}', style='green')
+            text.append(f' The train has ')
+            text.append(f'{row[2]}', style='magenta')
+            text.append(f' seats cars and ')
+            text.append(f'{row[3]}', style='cyan')
+            text.append(f' sleeping cars.')
+            console.print(text)
     # Close connection to database and return result list
     conn.close()    
     return result

@@ -2,6 +2,8 @@ import re
 import sqlite3
 from datetime import datetime
 from rich.console import Console
+from rich.text import Text
+from rich.prompt import Prompt
 from code.routeSearch import findRoutesDateTime
 
 console = Console(color_system="256")
@@ -176,9 +178,18 @@ def buy_chair_ticket(occurrence, c, conn, orderID):
                 seatsForCar.append(seat)
             print(f"Car #{i}: ")
             print("__________________________________________")
-            print(f"[] 1 {GREEN if seatsForCar[0] == 'AV' else RED}{seatsForCar[0]}{RESET} | 2  {GREEN if seatsForCar[1] == 'AV' else RED}{seatsForCar[1]}{RESET}|\t| 3  {GREEN if seatsForCar[2] == 'AV' else RED}{seatsForCar[2]}{RESET} | 4  {GREEN if seatsForCar[3] == 'AV' else RED}{seatsForCar[3]}{RESET} []")
-            print(f"[] 5 {GREEN if seatsForCar[4] == 'AV' else RED}{seatsForCar[4]}{RESET} | 6  {GREEN if seatsForCar[5] == 'AV' else RED}{seatsForCar[5]}{RESET}|\t| 7  {GREEN if seatsForCar[6] == 'AV' else RED}{seatsForCar[6]}{RESET} | 8  { GREEN if seatsForCar[7] == 'AV' else RED}{seatsForCar[7]}{RESET} []")
-            print(f"[] 9 {GREEN if seatsForCar[8] == 'AV' else RED}{seatsForCar[8]}{RESET} | 10 {GREEN if seatsForCar[9] == 'AV' else RED}{seatsForCar[9]}{RESET}|\t| 11 {GREEN if seatsForCar[10] == 'AV' else RED}{seatsForCar[10]}{RESET} | 12 {GREEN if seatsForCar[11] == 'AV' else RED}{seatsForCar[11]}{RESET} []")
+            for i in range(0, 12, 4):
+                text = Text()
+                for j in range(i, i + 4):
+                    color = "green" if seatsForCar[j] == "AV" else "red"
+                    if (j == 0 or j == 4 or j == 8):
+                        text.append('[] ')
+                    text.append(f"{j + 1} {seatsForCar[j]}", style=color)
+                    if (j == 11 or j == 3 or j == 7):
+                        text.append(' []')
+                    else:
+                        text.append(' | ')
+                console.print(text)
             print("__________________________________________\n\n")
     
         #############################
@@ -221,12 +232,12 @@ def new_order(db_path):
     
     email = input('Enter your email: ')
     if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
-        print("Invalid email.")
+        console.print("! Invalid email.", style='red')
         return
     
     phone = input('Enter your phone number: ')
     if not re.match(r"^\d{8}$", phone):
-        print("Invalid phone number. Only 10 digits are allowed.")
+        console.print("! Invalid phone number. Please enter a valid 8-digit phone number.", style='red')
         return
     
     # Check if the user exists
@@ -272,13 +283,23 @@ def new_order(db_path):
                         console.print(" All the routes are available to be booked", style='green')
                     else:
                         console.print("\n! Not all the routes are available to be booked\n", style='yellow')
-                        console.print("! AVAILABLE ROUTES:", style='blue')
+                        console.print("AVAILABLE ROUTES:", style='bold cyan')
                         for index, row in enumerate(occurrenceExists):
-                            console.print(f'[{index}]: {row[-2]} the {row[-1]} at {row[9]} {row[4]} N-{row[0]} will pass from {row[5]} to {row[7]}. The train has {row[2]} seats cars and {row[3]} sleeping cars.', style='blue')
+                            text = Text(f'Index ', style='bold')
+                            text.append(f'{index}', style='#FFAF00')
+                            text.append(f':\t N-{row[0]} will pass on {row[-2]} the {row[-1]} at ')
+                            text.append(f'{row[9]}', style='green')
+                            text.append(f' The train has ')
+                            text.append(f'{row[2]}', style='magenta')
+                            text.append(f' seats cars and ')
+                            text.append(f'{row[3]}', style='cyan')
+                            text.append(f' sleeping cars.')
+                            console.print(text)
                     
-                    idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
+                    prompt_text = f'Choose your route by inserting the [bold #FFAF00]index[/bold #FFAF00] [0, {len(occurrenceExists)-1}]: '
+                    idx = int(Prompt.ask(prompt_text, console=console))
                     if not (0 <= idx < len(occurrenceExists)):
-                        idx = int(input(f'Choose your route by inserting the index [0, {len(occurrenceExists)-1}]: '))
+                        idx = int(Prompt.ask(prompt_text, console=console))
                     
                     funcUser = input('\n Inside Ticket Shop: \n [1] Buy a Ticket for a Chair \n [2] Buy a ticket for a Bed \n [0] Exit\n \t>')
                     
@@ -315,12 +336,12 @@ def get_orders(db_path):
 
     # Validate email
     if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
-        print("Invalid email.")
+        console.print("! Invalid email.", style='red')
         return
 
     # Validate phone number
     if not re.match(r"^\d{8}$", phone):
-        print("Invalid phone number. Only 10 digits are allowed.")
+        console.print("! Invalid phone number. Please enter a valid 8-digit phone number.", style='red')
         return
 
     # Connect to the SQLite database
