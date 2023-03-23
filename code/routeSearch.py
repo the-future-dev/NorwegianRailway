@@ -78,7 +78,7 @@ def findRoutesDateTime(db_path):
     #connect to the database
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
-    print('Search for train routes going between a starting station and an ending station based on date and starting time.')
+    print('\nSearch for train routes going between a starting station and an ending station based on date and starting time.')
 
     #input
     staStation = input('Starting Station (ex. Trondheim): ')
@@ -146,7 +146,7 @@ def findRoutesDateTime(db_path):
     if len(result) == 0:
         console.print(f"! No Result for {dayOfTheWeek} or {nextDay}", style='red')
     else:
-        console.print("Routes Scheduled",style='cyan')
+        console.print("\nRoutes Scheduled",style='cyan')
         for index, row in enumerate(result):
             text = Text(f'Index ', style='bold')
             text.append(f'{index}', style='#FFAF00')

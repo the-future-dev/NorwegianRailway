@@ -2,6 +2,7 @@ import os
 
 from rich.console      import Console
 from rich.text         import Text
+from rich.prompt        import Prompt
 from code.init          import create_tables, insert_tables                     #Opgave  A, B, F
 from code.routeSearch   import get_train_routes, findRoutesDateTime             #Oppgave C, D
 from code.customer      import register_customer, new_order, get_orders         #Oppgave E, G
@@ -34,7 +35,7 @@ def main(fileExists):
         
     funcUser = '' 
     while funcUser != '0':
-        funcUser = input('\n MENU: \n [1] Get all train routes that stop at a particular station on a given weekday \n [2] Search Routes \n [3] Signup \n [4] Buy Tickets \n [5] Retrieve orders\n [0] Exit \n > ')
+        funcUser = Prompt.ask('\n MENU \n [bold cyan]1[/bold cyan] Get all train routes that stop at a particular station on a given weekday \n [bold cyan]2[/bold cyan] Search Routes \n [bold cyan]3[/bold cyan] Signup \n [bold cyan]4[/bold cyan] Buy Tickets \n [bold cyan]5[/bold cyan] Retrieve orders\n [bold cyan]0[/bold cyan] Exit \n > ')
         if funcUser == '1':
             get_train_routes(db_path)
         elif funcUser == '2':

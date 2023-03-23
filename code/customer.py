@@ -371,8 +371,9 @@ def get_orders(db_path):
                 compartment_no, bed_no,date_of_occurrence,\
                 starting_station_name,\
                 ending_station_name= order
-                
-                print(f"\nPurchase Time: {purchase_time}\nPurchase Date: {purchase_date}\nRoute ID: {route_id}\nCar ID: {car_id}\nCompartment No.: {compartment_no}\nBed No.: {bed_no}\nDate of Occurrence: {date_of_occurrence}\nStarting Station Name: {starting_station_name}\nEnding Station Name: {ending_station_name}")
+
+                console.print(f"Route ID: [red]{route_id}[/red] Car ID: [blue]{car_id}[/blue] Compartment No.: [green]{compartment_no}[/green] Bed No.: [yellow]{bed_no}[/yellow] Date of Occurrence: [magenta]{date_of_occurrence}[/magenta]", end="")
+                console.print(f" Starting Station Name: [cyan]{starting_station_name}[/cyan] Ending Station Name: [purple]{ending_station_name}[/purple]")
         else:
             console.print("No bed tickets", style='red')
         
@@ -398,7 +399,8 @@ def get_orders(db_path):
                 seat_no,date_of_occurrence,\
                 starting_station_name,\
                 ending_station_name=order
-                
-                print(f"\nPurchase Time:{purchase_time}\nPurchase Date:{purchase_date}\nRoute ID:{route_id}\nCar ID:{car_id}\nSeat No.:{seat_no}\nDate of Occurrence:{date_of_occurrence}\nThe Starting Station Name:{starting_station_name} \nThe Ending Station Name:{ending_station_name}")
+
+                console.print(f"Route ID: [red]{route_id}[/red] Car ID: [blue]{car_id}[/blue] Seat No.: [green]{seat_no}[/green] Date of Occurrence: [yellow]{date_of_occurrence}[/yellow]", end="")
+                console.print(f" The Starting Station Name: [magenta]{starting_station_name}[/magenta] The Ending Station Name: [cyan]{ending_station_name}[/cyan]")
         else:
             console.print("No chair tickets", style='red')
