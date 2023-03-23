@@ -1,4 +1,4 @@
 #Ignore all the databases that are created locally
-database/railway.db
+railway.db
 NorwegianRailwayUI.py
 __pycache__
