@@ -20,6 +20,7 @@ def register_customer(db_path):
     while True:
         name = input('> Enter your name: ')
         if (re.match(r"^[a-zA-Z\s]*$", name)):
+            console.print("! Invalid name.", style='red')
             break
         console.print("! Invalid name. Only letters and spaces are allowed. No special letters. Please try again.", style= 'red')
 
@@ -55,9 +56,6 @@ def register_customer(db_path):
 ## ! Only sell available seats.
 ##############################################################################################################
 
-RED = '\033[31m'
-GREEN = '\033[32m'
-RESET = '\033[0m'
 
 def bedAvailable(beds, compartmentNo, bedNo):
     found = False
@@ -69,9 +67,9 @@ def bedAvailable(beds, compartmentNo, bedNo):
 
 def coloredPrintBed(beds, compartment, bedNo):
     if bedAvailable(beds, compartment, bedNo):
-        return f'{GREEN}AV{RESET}'
+        return '[green]AV[/green]'
     else:
-        return f'{RED}NA{RESET}'
+        return '[red]NA[/red]'
     
 def buy_bed_ticket(occurrence, c, conn, orderID):
     routeID = int(occurrence[0])
@@ -99,10 +97,10 @@ def buy_bed_ticket(occurrence, c, conn, orderID):
     if beds is not None:
         # As the implemenattion just has one car that's with bed the function is simplified
         print(f"Car #1:")
-        print(f"Compartment #{1} | Bed 1: {coloredPrintBed(beds, 1, 1)} | Bed 2: {coloredPrintBed(beds, 1, 2)}")
-        print(f"Compartment #{2} | Bed 1: {coloredPrintBed(beds, 2, 1)} | Bed 2: {coloredPrintBed(beds, 2, 2)}")
-        print(f"Compartment #{3} | Bed 1: {coloredPrintBed(beds, 3, 1)} | Bed 2: {coloredPrintBed(beds, 3, 2)}")
-        print(f"Compartment #{4} | Bed 1: {coloredPrintBed(beds, 4, 1)} | Bed 2: {coloredPrintBed(beds, 4, 2)}")
+        console.print(f"Compartment #{1} | Bed 1: {coloredPrintBed(beds, 1, 1)} | Bed 2: {coloredPrintBed(beds, 1, 2)}")
+        console.print(f"Compartment #{2} | Bed 1: {coloredPrintBed(beds, 2, 1)} | Bed 2: {coloredPrintBed(beds, 2, 2)}")
+        console.print(f"Compartment #{3} | Bed 1: {coloredPrintBed(beds, 3, 1)} | Bed 2: {coloredPrintBed(beds, 3, 2)}")
+        console.print(f"Compartment #{4} | Bed 1: {coloredPrintBed(beds, 4, 1)} | Bed 2: {coloredPrintBed(beds, 4, 2)}")
     
         while True:
             #carNo           = int(input("Select the car: "))
@@ -184,7 +182,10 @@ def buy_chair_ticket(occurrence, c, conn, orderID):
                     color = "green" if seatsForCar[j] == "AV" else "red"
                     if (j == 0 or j == 4 or j == 8):
                         text.append('[] ')
-                    text.append(f"{j + 1} {seatsForCar[j]}", style=color)
+                    if (j == 1 or j == 5 or j == 2 or j==6 or j == 3 or j == 7):
+                        text.append(f"{j + 1} {seatsForCar[j]} ", style=color)
+                    else:
+                        text.append(f"{j + 1} {seatsForCar[j]}", style=color)
                     if (j == 11 or j == 3 or j == 7):
                         text.append(' []')
                     else:
@@ -228,6 +229,7 @@ def new_order(db_path):
     
     name = input('Enter your name: ')
     if (not re.match(r"^[a-zA-Z\s]*$", name)):
+        console.print("! Invalid name.", style='red')
         return
     
     email = input('Enter your email: ')
@@ -266,7 +268,7 @@ def new_order(db_path):
         console.print(f'\nLogged In !', style='green')
         funcUser = ''
         while True:
-            funcUser = input('\n Ticket Shop: \n [1] Buy a Ticket \n [0] Exit Ticket Shop \n \t>')
+            funcUser = Prompt.ask('\n Ticket Shop: \n [bold cyan]1[/bold cyan] Buy a Ticket \n [bold cyan]0[/bold cyan] Exit Ticket Shop \n \t>', console=console)
             if funcUser == '0':
                 break
             possibleRoutes = findRoutesDateTime(db_path)
@@ -286,7 +288,7 @@ def new_order(db_path):
                         console.print("AVAILABLE ROUTES:", style='bold cyan')
                         for index, row in enumerate(occurrenceExists):
                             text = Text(f'Index ', style='bold')
-                            text.append(f'{index}', style='#FFAF00')
+                            text.append(f'{index}', style='#FF6600')
                             text.append(f':\t N-{row[0]} will pass on {row[-2]} the {row[-1]} at ')
                             text.append(f'{row[9]}', style='green')
                             text.append(f' The train has ')
@@ -296,12 +298,12 @@ def new_order(db_path):
                             text.append(f' sleeping cars.')
                             console.print(text)
                     
-                    prompt_text = f'Choose your route by inserting the [bold #FFAF00]index[/bold #FFAF00] [0, {len(occurrenceExists)-1}]: '
+                    prompt_text = f'Choose your route by inserting the [bold #FF6600]index[/bold #FF6600] [0, {len(occurrenceExists)-1}]'
                     idx = int(Prompt.ask(prompt_text, console=console))
                     if not (0 <= idx < len(occurrenceExists)):
                         idx = int(Prompt.ask(prompt_text, console=console))
                     
-                    funcUser = input('\n Inside Ticket Shop: \n [1] Buy a Ticket for a Chair \n [2] Buy a ticket for a Bed \n [0] Exit\n \t>')
+                    funcUser = Prompt.ask('\n Inside Ticket Shop: \n [bold cyan]1[/bold cyan] Buy a Ticket for a Chair \n [bold cyan]2[/bold cyan] Buy a ticket for a Bed \n [bold cyan]0[/bold cyan] Exit\n \t>', console=console)
                     
                     if funcUser == '1':
                         buy_chair_ticket(occurrenceExists[idx], c, conn, orderID)
@@ -354,8 +356,7 @@ def get_orders(db_path):
     customerID = c.fetchone()
     
     if customerID:
-        # print(f"The customer ID is {customerID[0]}")
-        
+        console.print(f'\nYOUR ORDERS', style='')
         # Retrieve bed ticket orders
         c.execute("""SELECT purchaseTime, purchaseDate, routeID, carID, compartmentNo, bedNo,
                      dateOfOccurrence, startingStationName, endingStationName FROM CustomerOrder 
@@ -403,4 +404,6 @@ def get_orders(db_path):
                 console.print(f"Route ID: [red]{route_id}[/red] Car ID: [blue]{car_id}[/blue] Seat No.: [green]{seat_no}[/green] Date of Occurrence: [yellow]{date_of_occurrence}[/yellow]", end="")
                 console.print(f" The Starting Station Name: [magenta]{starting_station_name}[/magenta] The Ending Station Name: [cyan]{ending_station_name}[/cyan]")
         else:
-            console.print("No chair tickets", style='red')
+            console.print("No chair tickets yet", style='red')
+    else:
+        console.print("! No customer with these attributes", style='red')

@@ -78,13 +78,13 @@ def findRoutesDateTime(db_path):
     #connect to the database
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
-    print('\nSearch for train routes going between a starting station and an ending station based on date and starting time.')
+    print('\nSearch for train routes going between a starting station and an ending station based on date and starting time.\n')
 
     #input
-    staStation = input('Starting Station (ex. Trondheim): ')
-    endStation = input('Starting Station (ex. Mo i Rana): ')
-    date = inputWithFormat('Date (format YYYY-MM-DD): ', '%Y-%m-%d')
-    time = inputWithFormat('Starting Time (format HH:MM): ', '%H:%M')
+    staStation = input('Starting Station: ')
+    endStation = input('Starting Station: ')
+    date = inputWithFormat('Date (YYYY-MM-DD): ', '%Y-%m-%d')
+    time = inputWithFormat('Starting Time (HH:MM): ', '%H:%M')
 
     # Input interpretation: find day of the week and next day of the week
     dayOfTheWeek = dateToWeekday(date)
@@ -149,7 +149,7 @@ def findRoutesDateTime(db_path):
         console.print("\nRoutes Scheduled",style='cyan')
         for index, row in enumerate(result):
             text = Text(f'Index ', style='bold')
-            text.append(f'{index}', style='#FFAF00')
+            text.append(f'{index}', style='#FF6600')
             text.append(f':\t N-{row[0]} will pass on {row[-2]} the {row[-1]} at ')
             text.append(f'{row[9]}', style='green')
             text.append(f' The train has ')
