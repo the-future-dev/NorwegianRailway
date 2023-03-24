@@ -15,8 +15,8 @@ def get_train_routes(db_path):
     c = conn.cursor()
 
     
-    station_name = input('Insert the station name (ex. Trondheim): ')
-    weekday = input('Insert the day (ex. Monday): ')
+    station_name = input('Station name (ex. Trondheim): ')
+    weekday = input('Day of the week (ex. Monday): ')
 
     # Query to find train routes passing through the inputted station on the inputted day
     query = """
@@ -82,7 +82,7 @@ def findRoutesDateTime(db_path):
 
     #input
     staStation = input('Starting Station: ')
-    endStation = input('Starting Station: ')
+    endStation = input('Ending Station: ')
     date = inputWithFormat('Date (YYYY-MM-DD): ', '%Y-%m-%d')
     time = inputWithFormat('Starting Time (HH:MM): ', '%H:%M')
 

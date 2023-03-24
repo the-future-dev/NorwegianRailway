@@ -20,7 +20,6 @@ def register_customer(db_path):
     while True:
         name = input('> Enter your name: ')
         if (re.match(r"^[a-zA-Z\s]*$", name)):
-            console.print("! Invalid name.", style='red')
             break
         console.print("! Invalid name. Only letters and spaces are allowed. No special letters. Please try again.", style= 'red')
 
@@ -101,33 +100,40 @@ def buy_bed_ticket(occurrence, c, conn, orderID):
         console.print(f"Compartment #{2} | Bed 1: {coloredPrintBed(beds, 2, 1)} | Bed 2: {coloredPrintBed(beds, 2, 2)}")
         console.print(f"Compartment #{3} | Bed 1: {coloredPrintBed(beds, 3, 1)} | Bed 2: {coloredPrintBed(beds, 3, 2)}")
         console.print(f"Compartment #{4} | Bed 1: {coloredPrintBed(beds, 4, 1)} | Bed 2: {coloredPrintBed(beds, 4, 2)}")
-    
-        while True:
-            #carNo           = int(input("Select the car: "))
-            compartmentNo   = int(input("Select the compartment: "))
-            bedNo             = int(input("Select the number of beds (1 or 2): "))
-            if bedAvailable(beds, compartmentNo, bedNo):
+
+        allBooked = True
+        for i in range(0, 13):
+            if bedAvailable(beds, i, 1):
+                allBooked = False
                 break
-            else:
-                console.print("The selected car and seat are not available. Please try again.", style='red')
-        
-        carID = 1
-        if carID is not None:
-            #############################
-            ##INSERTION
-            #############################
-            query = "INSERT INTO BedTicket (carID, compartmentNo, bedNo, dateOfOccurrence, routeID, orderID, startingStationName, endingStationName) VALUES (?,?,?,?,?,?,?,?);"
-            try:
-                c.execute(query, (carID, compartmentNo, 1, date, routeID, orderID, startingStationName, endingStationName))
-                conn.commit()
-                if bedNo == 2:
-                    c.execute(query, (carID, compartmentNo, 2, date, routeID, orderID, startingStationName, endingStationName))
+        if (not allBooked):
+            while True:
+                #carNo           = int(input("Select the car: "))
+                compartmentNo   = int(input("\nSelect the compartment: "))
+                bedNo             = int(input("Select the number of beds (1 or 2): "))
+                if bedAvailable(beds, compartmentNo, bedNo):
+                    break
+                else:
+                    console.print("The selected car and seat are not available. Please try again.", style='red')
+            carID = 1
+            if carID is not None:
+                #############################
+                ##INSERTION
+                #############################
+                query = "INSERT INTO BedTicket (carID, compartmentNo, bedNo, dateOfOccurrence, routeID, orderID, startingStationName, endingStationName) VALUES (?,?,?,?,?,?,?,?);"
+                try:
+                    c.execute(query, (carID, compartmentNo, 1, date, routeID, orderID, startingStationName, endingStationName))
                     conn.commit()
-                console.print("Purchase Successful", style="green")
-            except Exception as e:
-                console.print(f"! Unsuccessful Purchase: {e}", style="red")
+                    if bedNo == 2:
+                        c.execute(query, (carID, compartmentNo, 2, date, routeID, orderID, startingStationName, endingStationName))
+                        conn.commit()
+                    console.print("Purchase Successful", style="green")
+                except Exception as e:
+                    console.print(f"! Unsuccessful Purchase: {e}", style="red")
+            else:
+                console.print(f"! Unsuccessful Selection")
         else:
-            console.print(f"! Unsuccessful Selection")
+            console.print(f"! Unsuccessful Selection: All booked", style="red")
     else:
         console.print(f"! Unsuccessful Selection")
 
@@ -175,7 +181,7 @@ def buy_chair_ticket(occurrence, c, conn, orderID):
                         availableSeats.append((i, j))
                 seatsForCar.append(seat)
             print(f"Car #{i}: ")
-            print("__________________________________________")
+            print("__________________________________")
             for i in range(0, 12, 4):
                 text = Text()
                 for j in range(i, i + 4):
@@ -191,7 +197,7 @@ def buy_chair_ticket(occurrence, c, conn, orderID):
                     else:
                         text.append(' | ')
                 console.print(text)
-            print("__________________________________________\n\n")
+            print("__________________________________\n\n")
     
         #############################
         ##SELECTION
