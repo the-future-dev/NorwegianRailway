@@ -1,5 +1,5 @@
 <h1>Norwegian Railway!</h1>
-<div style="text-align: center;">
+<div style="display: flex; align-items: center; justify-content: center;">
   <img src="./images/norwegian.jpg" alt="plot" width="50%">
 </div>
 
