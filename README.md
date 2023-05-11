@@ -1,4 +1,7 @@
-<img src="./images/norwegian.jpg" alt="plot" width="50%">
+<h1>Norwegian Railway!</h1>
+<div style="text-align: center;">
+  <img src="./images/norwegian.jpg" alt="plot" width="50%">
+</div>
 
 The following repository is the result of the project by Andrea Ritossa and Mali Faksvåg Kippernes at Norwegian University of Science And Technology.
 
